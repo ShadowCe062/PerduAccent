@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Manipulation de Tableau</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+    }
+
+    .container {
+        max-width: 400px;
+        margin: 10px auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+
+    textarea {
+        width: 80%;
+        height: 150px;
+        padding: 3px;
+        margin: 10px;
+        border-radius: 15px;
+    }
+
+    button {
+        padding: 10px 20px;
+        height: 50px;
+        width: 10%;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    button.traiter {
+      background-color: green;
+      margin: 5px;
+      text-align: center;
+      font-size: 18px;
+      line-height: 1.5;
+  }
+
+    button.refresh {
+        background-color: #fdc23e;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th, td {
+        padding: 8px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+    </style>
+</head>
+<body>
+<h1>J'ai perdu mon accent...</h1>
+<br>
+<textarea id="inputTableau" placeholder="Collez le contenu du tableau ici"></textarea>
+<br>
+<br>
+<button onclick="calculerColonnes()">Calculer Colonnes</button>
+<button class="traiter" onclick="traiterTableau()">Traiter</button>
+<button class="refresh" onclick="actualiser()">Actualiser</button>
+<br>
+<br>
+<input type="checkbox" id="enleverMajuscules"> Enlever les majuscules
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<input type="checkbox" id="enleverAccents"> Enlever les accents
+<br>
+<br>
+<!-- Conteneur pour les cases à cocher des colonnes -->
+<div id="colonnesContainer">
+    <!-- Les cases à cocher des colonnes seront générées ici -->
+</div>
+<br>
+<table id="resultatTableau">
+    <!-- Le résultat sera affiché ici -->
+</table>
+
+<script>
+    function calculerColonnes() {
+        const inputText = document.getElementById("inputTableau").value;
+        const lignes = inputText.split('\n');
+        const colonnesContainer = document.getElementById("colonnesContainer");
+
+        // Nettoyer le conteneur des cases à cocher précédentes
+        colonnesContainer.innerHTML = '';
+
+        if (lignes.length > 0) {
+            const premiereLigne = lignes[0].split('\t');
+            for (let i = 0; i < premiereLigne.length; i++) {
+                const label = document.createElement('label');
+                const input = document.createElement('input');
+                input.type = 'checkbox';
+                input.className = 'garderMajuscules';
+                input.value = i;
+                label.appendChild(input);
+                label.appendChild(document.createTextNode(`Garder majuscules (Colonne ${i + 1})`));
+                colonnesContainer.appendChild(label);
+            }
+        }
+    }
+
+    function traiterTableau() {
+        const inputText = document.getElementById("inputTableau").value;
+        const enleverAccentsOption = document.getElementById("enleverAccents").checked;
+        const tableauModifie = enleverAccentsOption ? enleverAccents(inputText) : inputText;
+        const enleverMajuscules = document.getElementById("enleverMajuscules").checked;
+        const garderMajuscules = document.querySelectorAll(".garderMajuscules");
+
+        const lignes = tableauModifie.split('\n');
+        const resultatTableau = document.getElementById("resultatTableau");
+
+        resultatTableau.innerHTML = '';
+
+        for (let i = 0; i < lignes.length; i++) {
+            const ligne = lignes[i].trim();
+            if (ligne !== '') {
+                const colonnes = ligne.split('\t');
+                const newRow = resultatTableau.insertRow();
+                for (let j = 0; j < colonnes.length; j++) {
+                    const cell = newRow.insertCell();
+                    if (garderMajuscules[j] && garderMajuscules[j].checked) {
+                        cell.textContent = colonnes[j];
+                    } else {
+                        cell.textContent = enleverMajuscules ? colonnes[j].toLowerCase() : colonnes[j];
+                    }
+                }
+            }
+        }
+    }
+
+    function enleverAccents(texte) {
+        return texte.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    function actualiser() {
+        document.getElementById("inputTableau").value = "";
+        document.getElementById("enleverMajuscules").checked = false;
+        document.getElementById("enleverAccents").checked = false;
+        const garderMajuscules = document.querySelectorAll(".garderMajuscules");
+        garderMajuscules.forEach(function (checkbox) {
+            checkbox.checked = false;
+        });
+        document.getElementById("colonnesContainer").innerHTML = ''; // Nettoyer les cases à cocher des colonnes
+        document.getElementById("resultatTableau").innerHTML = "";
+    }
+</script>
+</body>
+</html>
